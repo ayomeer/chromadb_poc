@@ -1,0 +1,11 @@
+services:
+  chromadb-dev: 
+    image: chromadb
+    container_name: chromadb_poc
+    network_mode: host  
+    volumes:
+      - ../:/proj/         
+    # environment:
+    #  - DISPLAY=host.docker.internal:0.0 # set display environment to local host IP
+    stdin_open: true
+    tty: true
