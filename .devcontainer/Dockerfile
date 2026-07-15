@@ -33,5 +33,8 @@ RUN sudo apt-get update && sudo apt-get install -y \
     build-essential libpq-dev
 
 # Install project dependencies
-RUN pip install chromadb ollama
+
+COPY requirements.txt .
+
+RUN pip install -r requirements.txt
 RUN curl -fsSL https://ollama.com/install.sh | sh

@@ -1,15 +1,21 @@
-import chromadb
-from chromadb.utils.embedding_functions.ollama_embedding_function import (
-    OllamaEmbeddingFunction,
-)
-chroma_client = chromadb.Client()
+# Make sure to run ollama and have the models used pulled to your machine before running!
 
-collection = chroma_client.create_collection(
+from typing import cast
+import chromadb
+from chromadb.api.types import EmbeddingFunction
+from chromadb.utils.embedding_functions.ollama_embedding_function import OllamaEmbeddingFunction
+
+chroma_client = chromadb.PersistentClient(path="./chroma")
+
+ollama_ef = OllamaEmbeddingFunction(
+        url="http://localhost:11434",
+        model_name="nomic-embed-text-v2-moe"
+)
+ollama_ef = cast(EmbeddingFunction, ollama_ef) # just so pylance doesn't freak out
+
+collection = chroma_client.get_or_create_collection(
     name="demo_collection",
-    embedding_function = OllamaEmbeddingFunction(
-        model_name="nomic-embed-text-v2-moe",
-        url="http://localhost:11434"
-    )
+    embedding_function=ollama_ef,
 )
 
 collection.add(
