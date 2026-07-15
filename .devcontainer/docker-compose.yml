@@ -4,7 +4,8 @@ services:
     container_name: chromadb_poc
     network_mode: host  
     volumes:
-      - ../:/proj/         
+      - ../:/proj/     
+      - ~/.ssh:/home/user/.ssh # forward ssh keys (linux-specific)      
     # environment:
     #  - DISPLAY=host.docker.internal:0.0 # set display environment to local host IP
     stdin_open: true
