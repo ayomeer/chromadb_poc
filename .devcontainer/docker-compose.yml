@@ -1,6 +1,6 @@
 services:
   chromadb-dev: 
-    image: chromadb
+    image: chromadb:dev
     container_name: chromadb_poc
     network_mode: host  
     volumes:

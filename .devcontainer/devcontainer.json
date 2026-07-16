@@ -1,5 +1,7 @@
 {
     "name": "chromadb-devcontainer",
+    "remoteUser": "user",
+    "updateRemoteUserUID": false,
     "dockerComposeFile": "docker-compose.yml",
     "service": "chromadb-dev",
     "workspaceFolder": "/proj",
