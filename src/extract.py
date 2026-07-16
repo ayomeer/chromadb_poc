@@ -63,7 +63,7 @@ def write_chroma_collection_from_directory(
         # Create dict for exporting data in chromdadb
         chroma_data_element: dict = {
             "id": str(id),
-            "metadata": {"file_path": str(path_in)},
+            "metadata": {"file_path": str(path)},
             "chunks": chunks,
         }
 

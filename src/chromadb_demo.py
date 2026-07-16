@@ -46,7 +46,8 @@ if __name__ == "__main__":
 
     ollama_ef = OllamaEmbeddingFunction(
         url="http://localhost:11434",
-        model_name="nomic-embed-text-v2-moe"
+        model_name="nomic-embed-text-v2-moe",
+        timeout=300
     )
     ollama_ef = cast(EmbeddingFunction, ollama_ef) # just so pylance doesn't freak out
 
@@ -55,42 +56,52 @@ if __name__ == "__main__":
         embedding_function=ollama_ef,
     )
 
-    # add_data_to_collection(
-    #     collection=collection,
-    #     data_path="/proj/output/chroma_data.json"
-    # )
 
     # load collection from json and create chroma collection from it
-    data_path="/proj/output/chroma_data.json"
-    with open(data_path, "r") as file:
-        collection_data: list[dict] = json.load(file)
+    # data_path="/proj/output/chroma_data.json"
+    # with open(data_path, "r") as file:
+    #     collection_data: list[dict] = json.load(file)
 
-    # flatten pdf doc data elements into lists of same lenth as chunks 
-    ids = []
-    documents = []
-    metadatas = []
-    i: int = 0
-    for element in collection_data:
-        documents.extend(element["chunks"])
-        for _ in element["chunks"]:
-            i += 1
-            ids.append(str(i))
-            metadatas.append(element["metadata"])
+    # # flatten pdf doc data elements into lists of same lenth as chunks 
+    # ids = []
+    # documents = []
+    # metadatas = []
+    # i: int = 0
+    # for element in collection_data:
+    #     documents.extend(element["chunks"])
+    #     for _ in element["chunks"]:
+    #         i += 1
+    #         ids.append(str(i))
+    #         metadatas.append(element["metadata"])
 
-    print("adding data to collection.")
-    collection.add(
-        ids=ids,
-        documents=documents,
-        metadatas=metadatas
-    )
+    # print("adding data to collection.")
+    # collection.add(
+    #     ids=ids,
+    #     documents=documents,
+    #     metadatas=metadatas
+    # )
 
     # query chromadb
-    print("query chromadb")
+    n_results=5
+    query_texts=[
+        "Gefahr für Amphibien beim überqueren von Strassen"
+    ]
     results = collection.query(
-        query_texts=[
-            "Amphibienlaichgebiet Gäsi",
-            "Einsprachen"
-        ],
-        n_results=2
+        query_texts=query_texts,
+        n_results=n_results
     )
-    print(results["documents"])
+    
+    for i, query_text in enumerate(query_texts):
+        print(f"\nQuery results for query {i}: '{query_text}':")
+        for j in range(n_results):
+            print("----------------------------------------------------")
+            print(f"RESULT {j+1}:")
+            print("----------------------------------------------------")
+            print("metadatas\n", results["metadatas"][i][j])
+            print("doucuments:\n", results["documents"][i][j])
+            print("istances:\n", results["distances"][i][j])
+
+    # print("Query 2 Results:")
+    # print(results["metadatas"][1])
+    # print(results["metadatas"][1])
+    # print(results["distances"][1])
