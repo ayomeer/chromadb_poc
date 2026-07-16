@@ -1,62 +1,96 @@
 # Make sure to run ollama and have the models used pulled to your machine before running!
-
+import json
+from pathlib import Path
 from typing import cast
 import chromadb
 from chromadb.api.types import EmbeddingFunction
 from chromadb.utils.embedding_functions.ollama_embedding_function import OllamaEmbeddingFunction
 
-chroma_client = chromadb.PersistentClient(path="./chroma")
 
-ollama_ef = OllamaEmbeddingFunction(
+def add_data_to_collection(
+    collection: chromadb.Collection, 
+    data_path: str | Path
+) -> None:
+    #parse args
+    data_path = Path(data_path)
+
+    
+
+    # load collection from json and create chroma collection from it
+    with open(data_path, "r") as file:
+        collection_data: list[dict] = json.load(file)
+
+    # flatten pdf doc data elements into lists of same lenth as chunks 
+    ids = []
+    documents = []
+    metadatas = []
+    i: int = 0
+    for element in collection_data:
+        documents.extend(element["chunks"])
+        for _ in element["chunks"]:
+            i += 1
+            ids.append(str(i))
+            metadatas.append(element["metadata"])
+
+    collection.add(
+        ids=ids,
+        documents=documents,
+        metadatas=metadatas
+    )
+    return
+
+if __name__ == "__main__":
+
+    # Set up chromadb objects
+    chroma_client = chromadb.PersistentClient(path="./chroma")
+
+    ollama_ef = OllamaEmbeddingFunction(
         url="http://localhost:11434",
         model_name="nomic-embed-text-v2-moe"
-)
-ollama_ef = cast(EmbeddingFunction, ollama_ef) # just so pylance doesn't freak out
+    )
+    ollama_ef = cast(EmbeddingFunction, ollama_ef) # just so pylance doesn't freak out
 
-collection = chroma_client.get_or_create_collection(
-    name="demo_collection",
-    embedding_function=ollama_ef,
-)
+    collection = chroma_client.get_or_create_collection(
+        name="demo_collection",
+        embedding_function=ollama_ef,
+    )
 
-collection.add(
-    ids=[
-        "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12",
-        "13", "14", "15", "16", "17", "18", "19", "20", "21", "22",
-        "23", "24",
-    ],
-    documents=[
-        "Die Imaging Solutions AG ist ein Schweizer Hersteller, der sich auf modulare Systeme für die automatisierte",
-        "Produktion von On -Demand -Fotodrucken, Layflat -Büchern und Leinwandrahmen spezialisiert hat. Seit 2003",
-        "hat sich Imaging Solutions als einer der führe nden Anbieter von kundenspezifischen Lösungen für die",
-        "Bildnachbearbeitungsindustrie weltweit etabliert.",
-        "Deine Aufgaben :",
-        "• Inbetriebnahme und Prüfung der Maschinen",
-        "• Termingerechte Bereitstellung der Maschinen gemäss Kundenauftrag",
-        "• Sicherstellen der Qualität und Funktionalität der Maschinen",
-        "• Baugruppenprüfung nach Prüfvorschriften und Verfahrensanweisungen",
-        "• Erstellen von Prüfdokumentationen und Checklisten",
-        "• Aufbau von Entwicklungsbaugruppen und deren Inbetriebnahme und Prüfung",
-        "• Mithilfe in der R&D Abteilung inkl. Tests von Baugruppen und Maschinen mit derer Dokumentation",
-        "• Service-Unterstützung bei Telefonsupport und weltweiten Kundeneinsätzen",
-        "(besonders während Peak -Season Nov.-Dez.)",
-        "• Dein Profil :",
-        "• Ausbildung als Elektroniker B/ Automatiker / Elektromechaniker oder Maschinenmechaniker E",
-        "• Sehr gute Kenntnisse in Mechanik, Elektrik und Pneumatik",
-        "• Kenntnisse in der Papierverarbeitung und Klebetechnik von Vorteil",
-        "• Einige Jahre Berufserfahrung in einer ähnlichen Position",
-        "• Gute Sprachkenntnisse in Deutsch (W+S), Englisch von Vorteil",
-        "• Sehr gute MS-Office Kenntnisse besonders Word und Excel",
-        "• Gute schriftliche Ausdrucksfähigkeit sowie die Fähigkeit, klare und strukturierte Texte (z. B.",
-        "Prüfdokumentationen und technische Berichte) zu verfassen",
-        "Sehr gute MS-Office Kenntnisse besonders Word und Excel",
-    ]
-)
+    # add_data_to_collection(
+    #     collection=collection,
+    #     data_path="/proj/output/chroma_data.json"
+    # )
 
-results = collection.query(
-    query_texts=[
-        "Microsoft",
-        "Am Computer Dokumente bearbeiten"
-    ]
-)
+    # load collection from json and create chroma collection from it
+    data_path="/proj/output/chroma_data.json"
+    with open(data_path, "r") as file:
+        collection_data: list[dict] = json.load(file)
 
-dummy = 1
+    # flatten pdf doc data elements into lists of same lenth as chunks 
+    ids = []
+    documents = []
+    metadatas = []
+    i: int = 0
+    for element in collection_data:
+        documents.extend(element["chunks"])
+        for _ in element["chunks"]:
+            i += 1
+            ids.append(str(i))
+            metadatas.append(element["metadata"])
+
+    print("adding data to collection.")
+    collection.add(
+        ids=ids,
+        documents=documents,
+        metadatas=metadatas
+    )
+
+    # query chromadb
+    print("query chromadb")
+    results = collection.query(
+        query_texts=[
+            "Amphibienlaichgebiet Gäsi",
+            "Einsprachen"
+        ],
+        n_results=2
+    )
+    print(results["documents"])
