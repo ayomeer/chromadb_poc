@@ -1,7 +1,8 @@
 from __future__ import annotations
-
-from pathlib import Path
 from typing import cast
+
+import json
+from pathlib import Path
 
 import pymupdf
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -31,10 +32,13 @@ text_splitter: RecursiveCharacterTextSplitter = RecursiveCharacterTextSplitter(
     chunk_size=500,
     chunk_overlap=50,
 )
-texts: list[str] = cast(list[str], text_splitter.split_text(text))
+chunks: list[str] = text_splitter.split_text(text)
 
-with open(path_out / "output.txt", "w", encoding="utf-8") as out:
-    for text_chunk in texts:
-        out.write(text_chunk)
+for i, chunk in enumerate(chunks):
+  with open(path_out / f"output_{i}.txt", "w", encoding="utf-8") as out:
+    out.write(chunk)  
+
+# 
+  # out.writelines(chunks)
 
 dummy: int = 1
