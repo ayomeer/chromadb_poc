@@ -17,3 +17,7 @@ When running the project on a new machine for the first time, you'll also need t
 ```bash
 ollama pull nomic-embed-text-v2-moe
 ```
+
+## Troubleshooting
+
+- `Can't open display :0` -> Run `xhost +local:docker` on host before opening container

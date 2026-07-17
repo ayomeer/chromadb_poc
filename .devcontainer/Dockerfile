@@ -30,10 +30,12 @@ USER $USERNAME
 RUN sudo apt-get update && sudo apt-get install -y \
     lsof curl zstd \
     git \
-    build-essential libpq-dev
+    build-essential libpq-dev \
+    tk-dev
 
 # Install project dependencies
-COPY requirements.txt .
-
-RUN pip install -r requirements.txt
 RUN curl -fsSL https://ollama.com/install.sh | sh
+
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
