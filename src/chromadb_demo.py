@@ -7,6 +7,8 @@ from chromadb.api.types import EmbeddingFunction
 from chromadb.utils.embedding_functions.ollama_embedding_function import OllamaEmbeddingFunction
 
 import umap 
+import numpy as np
+from matplotlib import pyplot as plt
 
 # -- Functions -------------------------------------------------------------------------
 def add_data_to_collection(
@@ -51,7 +53,7 @@ def text_query(
     collection: chromadb.Collection,
     n_results: int
 ) -> None:
-    """_summary_
+    """Query the collection using text strings.
 
     Args:
         query_texts (list[str]): List of query strings.
@@ -73,11 +75,16 @@ def text_query(
             print("doucuments:\n", results["documents"][i][j])
             print("istances:\n", results["distances"][i][j])
 
+def plot_points(
+    points: np.ndarray
+):
+    
+
 # -- Script Flow Control ---------------------------------------------------------------
-
 LOAD_NEW_DATA = False
-EXECUTION_MODE = 'query' # 'plot' or 'query'
+EXECUTION_MODE = 'plot' # 'plot' or 'query'
 
+# -- Main ------------------------------------------------------------------------------
 if __name__ == "__main__":
 
     # Set up chromadb objects
@@ -120,7 +127,10 @@ if __name__ == "__main__":
             results = collection.get(include=['embeddings'])
             points = reducer.fit_transform(results["embeddings"])
             dummy = 1
+
             # plot 2D space
+            plt.scatter(points)
+            plt.show()
 
         case _:
             print("Invalid EXECUTION_MODE.")

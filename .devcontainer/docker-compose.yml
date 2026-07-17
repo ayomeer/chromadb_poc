@@ -5,8 +5,10 @@ services:
     network_mode: host  
     volumes:
       - ../:/proj/     
-      - ~/.ssh:/home/user/.ssh # forward ssh keys (linux-specific)      
-    # environment:
-    #  - DISPLAY=host.docker.internal:0.0 # set display environment to local host IP
+      - ~/.ssh:/home/user/.ssh # forward ssh keys (linux-specific)
+      - /tmp/.X11-unix:/tmp/.X11-unix      
+    environment:
+      - DISPLAY=$DISPLAY
+      - MPLBACKEND=TkAgg
     stdin_open: true
     tty: true
