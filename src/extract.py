@@ -19,8 +19,6 @@ path_pdf_natural = Path(
 path_in = path_pdf_natural
 
 
-# -- Main --------------------------------------------------------------------------------- #
-
 
 def write_chroma_collection_from_directory(
     index_path: str | Path, output_path: str | Path
@@ -39,12 +37,24 @@ def write_chroma_collection_from_directory(
     text_splitter: RecursiveCharacterTextSplitter = RecursiveCharacterTextSplitter(
         chunk_size=500,
         chunk_overlap=50,
+        separators=["\n\n", "\n", ". ", " "]
     )
 
+    # read json and fill convert to chromadb digestible format
     chroma_data: list[dict] = []
-    for record in pdf_index:
-        id = record["id"]
-        path = record["path"]
+    for json_record in pdf_index:
+        id = json_record["id"]
+        path = Path(json_record["path"])
+
+        chunks = []
+
+        # -- Create metadata chunk --
+        parts = list(path.parts)[3:]
+        replace_table = str.maketrans("_-.", "   ")
+
+        metadata_string = " ".join(parts).translate(replace_table)
+
+        chunks.append(metadata_string)
 
         # -- Create content chunks --
         # Read raw text
@@ -57,8 +67,11 @@ def write_chroma_collection_from_directory(
             return
 
         # Chunk Text
+        content_chunks = text_splitter.split_text(text)
+        filename_words = path.stem.translate(replace_table)
+        augmented_content_chunks = [filename_words + "\n" + chunk for chunk in content_chunks]
 
-        chunks = text_splitter.split_text(text)
+        chunks.extend(augmented_content_chunks)
 
         # Create dict for exporting data in chromdadb
         chroma_data_element: dict = {
@@ -66,11 +79,8 @@ def write_chroma_collection_from_directory(
             "metadata": {"file_path": str(path)},
             "chunks": chunks,
         }
-
-        # TODO: create metadata chunk
-
-        # add element to list
         chroma_data.append(chroma_data_element)
+
 
     # Save chroma data export to json
     with open(output_path / "chroma_data.json", "w", encoding="utf-8") as out:
@@ -78,6 +88,7 @@ def write_chroma_collection_from_directory(
 
     return
 
+# -- Main --------------------------------------------------------------------------------- #
 
 if __name__ == "__main__":
     write_chroma_collection_from_directory(

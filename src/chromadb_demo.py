@@ -74,7 +74,7 @@ def text_query(
         query_texts=query_texts,
         n_results=n_results
     )
-    
+    print("Quering collection...")
     for i, query_text in enumerate(query_texts):
         print(f"\nQuery results for query {i}: '{query_text}':")
         for j in range(n_results):
@@ -82,7 +82,7 @@ def text_query(
             print(f"RESULT {j+1}:")
             print("----------------------------------------------------")
             print("Metadata\n", results["metadatas"][i][j], "\n")
-            print("Doucument:\n", results["documents"][i][j], "\n")
+            print("Document:\n", results["documents"][i][j], "\n")
             print("Distance:\n", results["distances"][i][j], "\n")
 
 def kde_density(points: NDArray):
@@ -112,11 +112,11 @@ def kde_density(points: NDArray):
 
 # -- Script Flow Control ---------------------------------------------------------------
 LOAD_NEW_DATA = False
-EXECUTION_MODE = 'plot' # 'plot' or 'query'
+EXECUTION_MODE = 'query' # 'plot' or 'query'
 
 # -- Main ------------------------------------------------------------------------------
 if __name__ == "__main__":
-
+    print("Setting up Chromadb objects...")
     # Set up chromadb objects
     chroma_client = chromadb.PersistentClient(path="./chroma")
 
@@ -127,12 +127,14 @@ if __name__ == "__main__":
     )
     ollama_ef = cast(EmbeddingFunction, ollama_ef) # just so pylance doesn't freak out
 
+    print("Creating collection...")
     collection = chroma_client.get_or_create_collection(
         name="demo_collection",
         embedding_function=ollama_ef,
     )
 
     if LOAD_NEW_DATA:
+        print("Loading fresh data into collection and creating embeddings...")
         add_data_to_collection(
             collection=collection,
             data_path="/proj/output/chroma_data.json"
@@ -140,10 +142,14 @@ if __name__ == "__main__":
 
     match EXECUTION_MODE:
         case 'query':
+            
             text_query(
                 collection=collection,
-                n_results=3,
-                query_texts=["Gefahr für Amphibien beim überqueren von Strassen"]
+                n_results=5,
+                query_texts=[
+                    "Amphibiengefährdung durch Strassen und Fahrzeuge"
+                    "Bodenuntersuchung Humusdeponie"
+                ]
             )
 
         case 'plot':
