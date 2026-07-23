@@ -49,10 +49,10 @@ def write_chroma_collection_from_directory(
         chunks = []
 
         # -- Create metadata chunk --
-        parts = list(path.parts)[3:]
+        dirnames = list(path.parts)[3:]
         replace_table = str.maketrans("_-.", "   ")
 
-        metadata_string = " ".join(parts).translate(replace_table)
+        metadata_string = "\n".join(dirnames).translate(replace_table)
 
         chunks.append(metadata_string)
 
